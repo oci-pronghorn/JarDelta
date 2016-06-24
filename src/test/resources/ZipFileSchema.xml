@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+
+   <template name="Entry" id="10">
+     <string name="name" id="11"/>
+     <byteVector name="ByteArray" id="12"/>
+   </template>
+  
+   <template name="ContainerOpen" id="20">
+     <string name="name" id="21"/>
+   </template>  
+    
+</templates>

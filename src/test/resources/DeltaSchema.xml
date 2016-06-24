@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+
+   <template name="AppendBytes" id="10">
+     <byteVector name="ByteArray" id="12"/>
+   </template>
+  
+   <template name="ReplicateBytes" id="20">
+     <int32 name="count" id="21"/>
+   </template>  
+    
+   <template name="CopyRangeBytes" id="30">
+     <int32 name="position" id="31"/>
+     <int32 name="length" id="32"/>     
+   </template>  
+   
+   <template name="NewEntry" id="40">
+     <string name="name" id="41"/>
+   </template>  
+   
+   <template name="CloseEntry" id="50">
+     <string name="name" id="51"/>
+   </template>
+       
+</templates>
