@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
 
-   <template name="Entry" id="10">
+   <template name="EntryFull" id="7">        <!--   111  7 -->
+     <string name="name" id="11"/>
+     <byteVector name="ByteArray" id="12"/>
+   </template>
+   
+   <template name="EntryBegin" id="5">       <!--   101  5 -->
+     <string name="name" id="11"/>
+     <byteVector name="ByteArray" id="12"/>
+   </template>
+   
+   <template name="EntryContinuation" id="4"> <!--  100  4 -->
+     <string name="name" id="11"/>
+     <byteVector name="ByteArray" id="12"/>
+   </template>
+   
+   <template name="EntryClose" id="6">        <!--  110  6 -->
      <string name="name" id="11"/>
      <byteVector name="ByteArray" id="12"/>
    </template>
   
-   <template name="ContainerOpen" id="20">
+   <template name="ContainerOpen" id="8">     <!--  1000 8 -->
      <string name="name" id="21"/>
    </template>  
     

@@ -8,14 +8,28 @@ import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 public class SaveZipContentStage extends PronghornStage {
 
     private final String targetFile;
+    private final Pipe<ZipFileSchema> zipData;
     
     public SaveZipContentStage(GraphManager graphManager, String targetFile, Pipe<ZipFileSchema> zipData) {
         super(graphManager, zipData, NONE);
         this.targetFile = targetFile;
+        this.zipData = zipData;
     }
+    
+    
+    @Override
+    public void startup() {
+        
+        //TODO: create file for targetFile;
+        
+    }
+    
     @Override
     public void run() {
-        // TODO write data out to zip file
+        //TODO: on recipt of openContainer message open file for write.
+        
+        //on recipt of entry messages write each chunk as we get them to the outgoing file entries.
+        
         
     }
 

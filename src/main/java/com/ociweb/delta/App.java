@@ -46,12 +46,7 @@ public class App
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        
-        
-        App instance = new App();
-        
-        GraphManager graphManager = new GraphManager();
-        
+ 
         /////////////////////////////////////////
         //ALL THE PIPE INSTANCES ARE DEFINED HERE
         /////////////////////////////////////////
@@ -76,10 +71,11 @@ public class App
  
         //////////////////////////////////////////////
         //ALL THE STAGES ARE CONSTRUCTED HERE
-        /////////////////////////////////////////////        
-        
-        //TODO: build static constuctors for these
-        
+        /////////////////////////////////////////////    
+               
+        GraphManager graphManager = new GraphManager();
+       
+                
         new LoadZipContentStage(graphManager, fileA, contentPipeA);        
         new SplitterStage<>(graphManager, contentPipeA, contentForDeltaPipeA, contentForTestPipeA);
         
