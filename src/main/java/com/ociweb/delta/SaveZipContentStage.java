@@ -30,6 +30,7 @@ public class SaveZipContentStage extends PronghornStage {
         
         //on recipt of entry messages write each chunk as we get them to the outgoing file entries.
         
+        //on recipt of msgIdx == -1 (EOF) then call requestShutdown();
         
     }
 
