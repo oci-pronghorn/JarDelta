@@ -40,7 +40,7 @@ public class LoadZipContentStage extends PronghornStage {
         //Must start with begin and end with end message id.
         
         
-        //when the end of the zip file is reached:  close the file and call requestShutdown();
+        //when the end of the zip file is reached:  close the file, send EOFPublish, and call requestShutdown();
         
     }
 
