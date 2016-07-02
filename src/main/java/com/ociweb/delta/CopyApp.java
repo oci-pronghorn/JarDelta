@@ -44,8 +44,7 @@ public class CopyApp {
         //this is needed later but we will develop it now
         /////////////////////////////////////////
         TrieParser trieNames = collectEntryNames(fileA);
-        
-        
+                
         
         /////////////////////////////////////////
         //ALL THE PIPE INSTANCES ARE DEFINED HERE
