@@ -16,6 +16,8 @@ import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 import com.ociweb.pronghorn.stage.scheduling.ThreadPerStageScheduler;
 import com.ociweb.pronghorn.stage.test.PipeCleanerStage;
 import com.ociweb.pronghorn.stage.test.TestValidator;
+import com.ociweb.pronghorn.util.BloomFilter;
+import com.ociweb.pronghorn.util.TrieParser;
 
 public class App 
 {    
@@ -39,6 +41,10 @@ public class App
         final String fileB = getOptArg("jarB", "b", args, "unknown file B");        
         final String deltaFile = getOptArg("deltaFile", "d", args, "deltaData.dat");
         final String newZipFile = getOptArg("reconstructedB", "newB", args, "newB.dat");
+        
+        
+        TrieParser trieNames = null; //TODO: build trie
+        
         
         RandomAccessFile deltaOutputFile;
         try {
@@ -82,7 +88,7 @@ public class App
         new LoadZipContentStage(graphManager, fileB, contentPipeB);        
         new SplitterStage<>(graphManager, contentPipeB, contentForDeltaPipeB, contentForTestPipeB);
                 
-        new DeltaProductionStage(graphManager, contentForDeltaPipeA, contentForDeltaPipeB, deltaPipe);
+        new DeltaProductionStage(graphManager, trieNames, contentForDeltaPipeA, contentForDeltaPipeB, deltaPipe);
         new SplitterStage<>(graphManager, deltaPipe, deltaTestPipe, deltaOutputPipe);
         
         new ApplyPatchStage(graphManager, contentForTestPipeA, deltaTestPipe, reconstructedPipeB);

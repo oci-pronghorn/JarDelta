@@ -5,9 +5,12 @@ import java.util.concurrent.TimeUnit;
 import com.ociweb.delta.schema.ZipFileSchema;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.pipe.PipeConfig;
+import com.ociweb.pronghorn.pipe.util.hash.MurmurHash;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 import com.ociweb.pronghorn.stage.scheduling.ThreadPerStageScheduler;
+import com.ociweb.pronghorn.util.BloomFilter;
+import com.ociweb.pronghorn.util.TrieParser;
 
 /*
  *   Tasks to complete:
@@ -36,6 +39,13 @@ public class CopyApp {
         final String fileA = getOptArg("jarA", "a", args, "unknown file A");
         final String fileB = getOptArg("jarB", "b", args, "unknown file B"); 
         
+        ////////////////////////////////////////
+        ///BUILD FILTER TO "RECOGNIZE" ALL THE EXISTING FILE NAMES.
+        //this is needed later but we will develop it now
+        /////////////////////////////////////////
+        TrieParser trieNames = collectEntryNames(fileA);
+        
+        
         
         /////////////////////////////////////////
         //ALL THE PIPE INSTANCES ARE DEFINED HERE
@@ -55,6 +65,24 @@ public class CopyApp {
         run(graphManager, watchMe);
 
     }
+    
+    private static TrieParser collectEntryNames(String fileA) {
+        
+        int size = 100000;//100K may not be enough room it it is not we will get an array out of bounds exception.
+        int seed = 101;//just a number;
+        
+        TrieParser trie = new TrieParser(size, 2, true, false); //takes int as value, uses fast match and need not support extraction
+        
+        
+        //TODO: walk over all the zip entries and take the "full name of each file"
+        //call this method to add the names to the filter
+        //           trie.setUTF8Value(<full name of entry here>, MurmurHash.hash32(<Body of entry here in bytes>, seed));
+        //          NOTE: if setUTF8Value throws then make size 2x bigger and do it again.
+        
+        
+        return trie;
+    }
+    
     
     private static void run(GraphManager graphManager, PronghornStage watchMe) {
         if (null!=watchMe) {
