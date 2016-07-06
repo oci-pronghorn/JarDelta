@@ -9,6 +9,7 @@ import com.ociweb.pronghorn.pipe.util.hash.MurmurHash;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 import com.ociweb.pronghorn.stage.scheduling.ThreadPerStageScheduler;
+import com.ociweb.pronghorn.stage.test.ConsoleJSONDumpStage;
 import com.ociweb.pronghorn.util.BloomFilter;
 import com.ociweb.pronghorn.util.TrieParser;
 
@@ -59,7 +60,8 @@ public class CopyApp {
                 
         PronghornStage watchMe = new LoadZipContentStage(graphManager, fileA, dataPipe);        
         
-        new SaveZipContentStage(graphManager, fileB, dataPipe);
+        new ConsoleJSONDumpStage<>(graphManager, dataPipe); // dumps file name, fields/data, separated by colons
+       // new SaveZipContentStage(graphManager, fileB, dataPipe);
                 
         run(graphManager, watchMe);
 
