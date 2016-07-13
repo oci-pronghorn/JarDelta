@@ -37,9 +37,10 @@ public class CopyApp {
     
     
     public static void main(String[] args) {
-        final String fileA = getOptArg("jarA", "a", args, "unknown file A");
-        final String fileB = getOptArg("jarB", "b", args, "unknown file B"); 
-        
+        //final String fileA = getOptArg("jarA", "a", args, "unknown file A");
+        //final String fileB = getOptArg("jarB", "b", args, "unknown file B"); 
+        final String fileA = args[0];
+    	
         ////////////////////////////////////////
         ///BUILD FILTER TO "RECOGNIZE" ALL THE EXISTING FILE NAMES.
         //this is needed later but we will develop it now
