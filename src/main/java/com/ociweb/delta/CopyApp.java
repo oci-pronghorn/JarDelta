@@ -39,8 +39,11 @@ public class CopyApp {
     public static void main(String[] args) {
         //final String fileA = getOptArg("jarA", "a", args, "unknown file A");
         //final String fileB = getOptArg("jarB", "b", args, "unknown file B"); 
-        final String fileA = args[0];
     	
+    	// Expecting args[0] to be name of fileA and args[1] to be fileB name in cwd
+    	final String fileA = args[0];
+        final String fileB = args[1];
+        
         ////////////////////////////////////////
         ///BUILD FILTER TO "RECOGNIZE" ALL THE EXISTING FILE NAMES.
         //this is needed later but we will develop it now
@@ -62,7 +65,7 @@ public class CopyApp {
         PronghornStage watchMe = new LoadZipContentStage(graphManager, fileA, dataPipe);        
         
         new ConsoleJSONDumpStage<>(graphManager, dataPipe); // dumps file name, fields/data, separated by colons
-       // new SaveZipContentStage(graphManager, fileB, dataPipe);
+        //new SaveZipContentStage(graphManager, fileB, dataPipe);
                 
         run(graphManager, watchMe);
 

@@ -1,5 +1,6 @@
 package com.ociweb.delta;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,13 +26,14 @@ public class LoadZipContentStage extends PronghornStage {
     // TODO: use member variables: counter activeFile, activePosition
 
     private File srcFile;
-    private int[]bufferArray;
+    private byte[]bufferArray;
     private ZipFile loadFile;
     private Enumeration ZipFileEnum;
+    private ByteArrayOutputStream boS;
     
     public LoadZipContentStage(	GraphManager graphManager, String sourceFilePath, Pipe<ZipFileSchema> zipData) {
         super(graphManager, NONE, zipData);
-        this.sourceFilePath = sourceFilePath;        
+        this.sourceFilePath = sourceFilePath;
         this.maxChunkSize = zipData.maxAvgVarLen;
         this.zipData = zipData;
     }
@@ -42,7 +44,6 @@ public class LoadZipContentStage extends PronghornStage {
         
         //TODO: create file object from sourceFilePath
     	srcFile = new File(sourceFilePath);
-		
     	try {
 			loadFile = new ZipFile(srcFile);
 		} catch (ZipException e) {
@@ -54,9 +55,10 @@ public class LoadZipContentStage extends PronghornStage {
 		}
         
 		//TODO: create buffer array of length maxChunkSize for copy of data
-        bufferArray = new int[maxChunkSize];
+        bufferArray = new byte[maxChunkSize];
         isFirstRun = true;
         activePosition=0;
+        ByteArrayOutputStream boS = new ByteArrayOutputStream();
     }
     
     @Override
@@ -75,7 +77,6 @@ public class LoadZipContentStage extends PronghornStage {
         //if this is is the first call then open the zip file and send the openContainer message
         if(isFirstRun)
         {
-        	/*
         	try {
     			loadFile = new ZipFile(srcFile);
     		} catch (ZipException e) {
@@ -85,18 +86,26 @@ public class LoadZipContentStage extends PronghornStage {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
     		}
-        	*/
         	
+        	// tryWriteFragment checks if there is room on the pipe
         	if (PipeWriter.tryWriteFragment(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8))
             {
-            	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName");
+//            	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName");
+            	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, sourceFilePath);
             	PipeWriter.publishWrites(zipData);
+            	
+            	load(loadFile, boS, bufferArray);
             	activePosition += maxChunkSize;
+
+            	
+            	
             }
         	else // EOF
         	{
         		PipeWriter.publishEOF(zipData);
-                zipData.closeBlobFieldWrite();
+                //zipData.closeBlobFieldWrite();
+        		//zipData.close();
+                System.out.println("Shutdown");
                 requestShutdown();
         	}
         	//void com.ociweb.pronghorn.pipe.PipeWriter.writeUTF8(Pipe pipe, int loc, CharSequence source)
@@ -105,14 +114,15 @@ public class LoadZipContentStage extends PronghornStage {
         }
         else if(!isFirstRun)
         {
-        	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName"); // message?
-        	PipeWriter.publishWrites(zipData);
+        	load(loadFile, boS, bufferArray);
         	activePosition += maxChunkSize;
+        	
+        	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName");
+        	PipeWriter.publishWrites(zipData);
+        	
+        	
         }
-        else
-        {
-        	System.out.println("Ambiguous Else!"); // TODO: remove once this works
-        }
+        
         
         //read every entry from the zip file.
         //on all other calls continue reading entries from the zip file.
@@ -121,37 +131,6 @@ public class LoadZipContentStage extends PronghornStage {
             and then we get
             "Exception IOException is not compatible with throws clause in PronghornStage.run()"
             */
-        /*
-        if(!isFirstRun)
-        {
-        	try {
-        		for (Enumeration<? extends ZipEntry> e = loadFile.entries();
-        				e.hasMoreElements();) {
-        			ZipEntry ze = e.nextElement();
-        			String name = ze.getName();
-        			if (name.endsWith(".txt")) {
-        				try {
-        					InputStream in = loadFile.getInputStream(ze);
-        					} catch (IOException e1) {
-        						// TODO Auto-generated catch block\
-        						e1.printStackTrace();
-        						}
-        				// read from 'in'
-        				PipeWriter.writeASCII(zipData, activePosition, sourceFilePath);
-        				//
-        				}
-        			}
-        		} finally {
-        			try {
-        				//loadFile.close();
-        				} catch (IOException e) {
-        					// TODO Auto-generated catch block
-        					e.printStackTrace();
-        					}
-        			}
-        			*/
-        	
-        
         
         
         //each entry is sent to the pipe as one or more messages each no longer than maxChunkSize.
@@ -177,5 +156,45 @@ public class LoadZipContentStage extends PronghornStage {
         } */
         isFirstRun = false;
     }
+        }
+    }
+    
+    static void load(ZipFile loadFile, ByteArrayOutputStream boS,byte[]bufferArray){
+    	try {
+    		for (Enumeration<? extends ZipEntry> e = loadFile.entries();
+    				e.hasMoreElements();) {
+    			ZipEntry ze = e.nextElement();
+    			InputStream in = loadFile.getInputStream(ze);
+    			boS.write(bufferArray, activePosition, bufferArray.length);
+    			bufferArray = boS.toByteArray();
+				PipeWriter.writeBytes(zipData, activePosition, bufferArray);
 
-}
+    			
+    			
+//    			String name = ze.getName();
+//    			if (name.endsWith(".txt")) {
+//    				try {
+//    					InputStream in = loadFile.getInputStream(ze);
+//    					} catch (IOException e1) {
+    						// TODO Auto-generated catch block\
+//    						e1.printStackTrace();
+//    						}
+    				// read from 'in'
+    				//PipeWriter.writeBytes(zipData, activePosition, source);
+//    				PipeWriter.writeBytes(zipData, activePosition, bufferArray);
+    				}
+    			} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    	finally {
+    			try {
+    				loadFile.close();
+    				requestShutdown(); // *** 
+    				} catch (IOException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    					}
+    			}
+   
+    }
