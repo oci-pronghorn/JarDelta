@@ -20,6 +20,7 @@ public class LoadZipContentStage extends PronghornStage {
     private final String sourceFilePath;
     private final int maxChunkSize;
     private final Pipe<ZipFileSchema> zipData;
+    private final int maxSizeofMSG = 4096;
     
     private static boolean isFirstRun;
     private static int activeFile, activePosition;
@@ -31,10 +32,14 @@ public class LoadZipContentStage extends PronghornStage {
     private Enumeration ZipFileEnum;
     private ByteArrayOutputStream boS;
     
+    
+    
+    
     public LoadZipContentStage(	GraphManager graphManager, String sourceFilePath, Pipe<ZipFileSchema> zipData) {
         super(graphManager, NONE, zipData);
         this.sourceFilePath = sourceFilePath;
-        this.maxChunkSize = zipData.maxAvgVarLen;
+        //this.maxChunkSize = zipData.maxAvgVarLen;
+        this.maxChunkSize = 4096;
         this.zipData = zipData;
     }
 
@@ -65,6 +70,8 @@ public class LoadZipContentStage extends PronghornStage {
     public void run(){
         // TODO load file from zip and push to content pipe
     	
+    	// check isFirstRun or tryWriteFragment first? or check file. file is already checked in startup()
+    	
     	// or should it be here?
         /*
         if (PipeWriter.tryWriteFragment(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8))
@@ -86,6 +93,7 @@ public class LoadZipContentStage extends PronghornStage {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
     		}
+
         	
         	// tryWriteFragment checks if there is room on the pipe
         	if (PipeWriter.tryWriteFragment(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8))
@@ -93,35 +101,60 @@ public class LoadZipContentStage extends PronghornStage {
 //            	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName");
             	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, sourceFilePath);
             	PipeWriter.publishWrites(zipData);
-            	
-            	load(loadFile, boS, bufferArray);
-            	activePosition += maxChunkSize;
-
-            	
-            	
-            }
-        	else // EOF
-        	{
-        		PipeWriter.publishEOF(zipData);
-                //zipData.closeBlobFieldWrite();
-        		//zipData.close();
-                System.out.println("Shutdown");
-                requestShutdown();
-        	}
-        	//void com.ociweb.pronghorn.pipe.PipeWriter.writeUTF8(Pipe pipe, int loc, CharSequence source)
-        	//PipeWriter.writeUTF8(pipe, loc, source);
-        	
-        }
+            	isFirstRun = false;
+            	// load
+            	try {
+            		for (Enumeration<? extends ZipEntry> e = loadFile.entries();
+            				e.hasMoreElements();) {
+            			ZipEntry ze = e.nextElement();
+            			InputStream in = loadFile.getInputStream(ze);
+            			
+            			// alternative at http://stackoverflow.com/questions/1264709/convert-inputstream-to-byte-array-in-java
+            			in.read(bufferArray);
+            			//boS.write(bufferArray, activePosition, bufferArray.length);
+            			//bufferArray = boS.toByteArray();
+            			
+            			// get entire file as array
+            			// 2 byte array once per file
+            			
+            			//mask value max int FFFF
+            			//size of message 4096, determines how many bytes can be sent with each publish on each call of run
+        				PipeWriter.writeBytes(zipData, activePosition, bufferArray);
+        				activePosition += maxChunkSize;
+            			
+//            			String name = ze.getName();
+//            			if (name.endsWith(".txt")) {
+//            				try {
+//            					InputStream in = loadFile.getInputStream(ze);
+//            					} catch (IOException e1) {
+            						// TODO Auto-generated catch block\
+//            						e1.printStackTrace();
+//            						}
+            				// read from 'in'
+            				//PipeWriter.writeBytes(zipData, activePosition, source);
+//            				PipeWriter.writeBytes(zipData, activePosition, bufferArray);
+            				}
+            			} catch (IOException e1) {
+        					// TODO Auto-generated catch block
+        					e1.printStackTrace();
+        				}
+            	finally {
+            		PipeWriter.publishWrites(zipData);
+            		}
+            	} // end of if (tryWriteFragment) block	
+        	} // end of if (isFirstRun) block
         else if(!isFirstRun)
         {
-        	load(loadFile, boS, bufferArray);
+        	//load(loadFile, boS, bufferArray);
         	activePosition += maxChunkSize;
         	
-        	PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName");
+        	//PipeWriter.writeUTF8(zipData, ZipFileSchema.MSG_CONTAINEROPEN_8_FIELD_NAME_21, "jarName");
         	PipeWriter.publishWrites(zipData);
-        	
-        	
         }
+        else // can't write to pipe
+        	{
+        	System.out.println("Can't write to pipe");
+        	}
         
         
         //read every entry from the zip file.
@@ -155,10 +188,11 @@ public class LoadZipContentStage extends PronghornStage {
 
         } */
         isFirstRun = false;
-    }
-        }
-    }
+        
+        } // end of run()
+}
     
+    /*
     static void load(ZipFile loadFile, ByteArrayOutputStream boS,byte[]bufferArray){
     	try {
     		for (Enumeration<? extends ZipEntry> e = loadFile.entries();
@@ -198,3 +232,5 @@ public class LoadZipContentStage extends PronghornStage {
     			}
    
     }
+    
+    */

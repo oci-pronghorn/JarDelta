@@ -68,6 +68,7 @@ public class CopyApp {
         //new SaveZipContentStage(graphManager, fileB, dataPipe);
                 
         run(graphManager, watchMe);
+        new ConsoleJSONDumpStage<>(graphManager, dataPipe); // dumps file name, fields/data, separated by colons
 
     }
     
