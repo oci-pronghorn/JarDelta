@@ -119,6 +119,15 @@ public class LoadZipContentStage extends PronghornStage {
 
 	// isFirstRun = false;
 	public void load() throws IOException {
+//		if(e)
+//		{
+//			// create enumeration
+//		}
+//		else
+//		{
+//			// continue using enumeration
+//		}
+		
 		try {
 			for (Enumeration<? extends ZipEntry> e = loadFile.entries(); e.hasMoreElements();) {
 				ZipEntry ze = e.nextElement();
@@ -132,7 +141,7 @@ public class LoadZipContentStage extends PronghornStage {
 					activePosition += maxChunkSize;
 				} else if (activePosition > ze.getSize()) // EOF, not last entry
 				{
-					ze = e.nextElement();
+					//ze = e.nextElement();
 				} else if (activePosition > ze.getSize() && !(e.hasMoreElements())) // EOF, last entry
 				{
 					System.out.println("EOF, No more elements, request shutdown");
